@@ -13,17 +13,9 @@
 <body>
   <main class="app" aria-label="動画カウンター">
     <section id="videoPane" class="video-pane" aria-label="動画エリア">
-      <div class="video-toolbar">
-        <label class="url-label" for="youtubeUrl">YouTube URL</label>
-        <div class="url-row">
-          <input id="youtubeUrl" inputmode="url" autocomplete="off" placeholder="https://youtu.be/..." aria-label="YouTube URL" />
-          <button id="loadVideo" class="btn btn-primary" type="button">表示</button>
-        </div>
-      </div>
       <div class="player-wrap">
-        <div id="playerPlaceholder" class="player-placeholder">
-          <span>動画URLを入力してください</span>
-        </div>
+        <button id="openVideoSettings" class="video-settings-btn" type="button" aria-label="YouTube動画を設定">⚙︎</button>
+        <div id="playerPlaceholder" class="player-placeholder" aria-hidden="true"></div>
         <iframe id="youtubePlayer" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
       </div>
     </section>
@@ -78,6 +70,20 @@
       </div>
     </section>
   </main>
+
+  <dialog id="videoDialog">
+    <form method="dialog" class="dialog-card video-dialog-card">
+      <h2>動画設定</h2>
+      <label class="dialog-label" for="youtubeUrl">YouTube URL</label>
+      <input id="youtubeUrl" inputmode="url" autocomplete="off" placeholder="https://youtu.be/..." aria-label="YouTube URL" />
+      <p id="videoError" class="dialog-error" role="alert" hidden>有効なYouTube URLまたは動画IDを入力してください。</p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">キャンセル</button>
+        <button id="clearVideo" value="clear" class="btn" type="button">動画解除</button>
+        <button id="loadVideo" value="confirm" class="btn btn-primary" type="button">設定</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="confirmDialog">
     <form method="dialog" class="dialog-card">
