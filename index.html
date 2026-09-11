@@ -10,8 +10,8 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Video Counter</title>
-  <link rel="manifest" href="manifest.webmanifest?v=0.1.1" />
-  <link rel="stylesheet" href="styles.css?v=0.1.1" />
+  <link rel="manifest" href="manifest.webmanifest?v=0.1.2" />
+  <link rel="stylesheet" href="styles.css?v=0.1.2" />
 </head>
 <body>
   <main class="app" aria-label="動画カウンター">
@@ -53,26 +53,32 @@
 
       <div id="counterGrid" class="counter-grid" aria-label="5種類のカウンター"></div>
 
-      <details class="tools">
-        <summary>補助計算</summary>
-        <div class="tool-grid">
-          <label>打ち始めGm<input id="startGame" type="number" min="0" step="1" inputmode="numeric" /></label>
-          <label>総Gm<input id="totalGame" type="number" min="0" step="1" inputmode="numeric" /></label>
-          <div class="tool-output"><span>個人Gm</span><strong id="personalGame">0</strong></div>
-        </div>
-        <div class="tool-grid tool-grid-rate">
-          <label>試行回数<input id="trialCount" type="number" min="0" step="1" inputmode="numeric" /></label>
-          <label>突入回数<input id="hitCount" type="number" min="0" step="1" inputmode="numeric" /></label>
-          <div class="tool-output"><span>突入率</span><strong id="hitRate">—</strong></div>
-        </div>
-      </details>
-
-      <div class="footer-row">
-        <span id="saveStatus" class="save-status">自動保存</span>
+      <div class="utility-row">
+        <button id="openTools" class="utility-btn" type="button">補助計算</button>
+        <span id="saveStatus" class="save-status" aria-live="polite">自動保存</span>
         <button id="clearAll" class="text-btn" type="button">全データ削除</button>
       </div>
     </section>
   </main>
+
+  <dialog id="toolsDialog">
+    <form method="dialog" class="dialog-card tools-dialog-card">
+      <h2>補助計算</h2>
+      <div class="tool-grid">
+        <label>打ち始めGm<input id="startGame" type="number" min="0" step="1" inputmode="numeric" /></label>
+        <label>総Gm<input id="totalGame" type="number" min="0" step="1" inputmode="numeric" /></label>
+        <div class="tool-output"><span>個人Gm</span><strong id="personalGame">0</strong></div>
+      </div>
+      <div class="tool-grid tool-grid-rate">
+        <label>試行回数<input id="trialCount" type="number" min="0" step="1" inputmode="numeric" /></label>
+        <label>突入回数<input id="hitCount" type="number" min="0" step="1" inputmode="numeric" /></label>
+        <div class="tool-output"><span>突入率</span><strong id="hitRate">—</strong></div>
+      </div>
+      <div class="dialog-actions">
+        <button value="close" class="btn btn-primary">閉じる</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="videoDialog">
     <form method="dialog" class="dialog-card video-dialog-card">
@@ -99,6 +105,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=0.1.1" defer></script>
+  <script src="app.js?v=0.1.2" defer></script>
 </body>
 </html>
