@@ -1,0 +1,19 @@
+{
+  "name": "Video Counter",
+  "short_name": "Counter",
+  "description": "YouTubeを見ながら使える動画カウンター",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07090c",
+  "theme_color": "#0b0f14",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

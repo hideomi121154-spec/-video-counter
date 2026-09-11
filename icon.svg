@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Video Counter icon">
+  <rect width="512" height="512" rx="112" fill="#0b0f14"/>
+  <rect x="64" y="72" width="384" height="176" rx="36" fill="#151b23" stroke="#2d3946" stroke-width="12"/>
+  <path d="M216 116v88l84-44z" fill="#39e0d0"/>
+  <circle cx="126" cy="348" r="52" fill="#ef476f"/>
+  <circle cx="256" cy="348" r="52" fill="#2ecc71"/>
+  <circle cx="386" cy="348" r="52" fill="#3498db"/>
+  <path d="M110 348h32M126 332v32M240 348h32M256 332v32M370 348h32M386 332v32" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+</svg>
