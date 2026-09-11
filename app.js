@@ -11,13 +11,16 @@
   ];
   const MODES = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-  const defaultsForMode = () => ({ game: 0, counters: Object.fromEntries(COUNTERS.map(c => [c.key, 0])) });
+  const defaultsForMode = () => ({
+    game: 0,
+    counters: Object.fromEntries(COUNTERS.map(c => [c.key, 0]))
+  });
+
   const defaults = () => ({
     version: 1,
     activeMode: 'A',
     videoId: '',
     videoUrl: '',
-    splitRatio: 0.40,
     modes: Object.fromEntries(MODES.map(m => [m, defaultsForMode()])),
     tools: { startGame: 0, totalGame: 0, trialCount: 0, hitCount: 0 }
   });
@@ -27,9 +30,6 @@
 
   const $ = id => document.getElementById(id);
   const els = {
-    app: document.querySelector('.app'),
-    videoPane: $('videoPane'),
-    splitter: $('splitter'),
     counterGrid: $('counterGrid'),
     youtubeUrl: $('youtubeUrl'),
     loadVideo: $('loadVideo'),
@@ -44,6 +44,8 @@
     gameMinus: $('gameMinus'),
     resetMode: $('resetMode'),
     clearAll: $('clearAll'),
+    openTools: $('openTools'),
+    toolsDialog: $('toolsDialog'),
     confirmDialog: $('confirmDialog'),
     dialogTitle: $('dialogTitle'),
     dialogMessage: $('dialogMessage'),
@@ -66,7 +68,9 @@
     if (!input || typeof input !== 'object') return base;
     return {
       game: sanitizeNonNegativeInt(input.game),
-      counters: Object.fromEntries(COUNTERS.map(c => [c.key, sanitizeNonNegativeInt(input.counters?.[c.key])]))
+      counters: Object.fromEntries(
+        COUNTERS.map(c => [c.key, sanitizeNonNegativeInt(input.counters?.[c.key])])
+      )
     };
   }
 
@@ -77,13 +81,11 @@
       if (!raw) return base;
       const parsed = JSON.parse(raw);
       const activeMode = MODES.includes(parsed.activeMode) ? parsed.activeMode : 'A';
-      const splitRatio = Number.isFinite(parsed.splitRatio) ? Math.min(.70, Math.max(.24, parsed.splitRatio)) : .40;
       return {
         ...base,
         activeMode,
         videoId: typeof parsed.videoId === 'string' ? parsed.videoId.slice(0, 32) : '',
         videoUrl: typeof parsed.videoUrl === 'string' ? parsed.videoUrl.slice(0, 500) : '',
-        splitRatio,
         modes: Object.fromEntries(MODES.map(m => [m, normalizeMode(parsed.modes?.[m])])),
         tools: {
           startGame: sanitizeNonNegativeInt(parsed.tools?.startGame),
@@ -123,7 +125,9 @@
     }
   }
 
-  function currentMode() { return state.modes[state.activeMode]; }
+  function currentMode() {
+    return state.modes[state.activeMode];
+  }
 
   function rateText(game, count) {
     if (!count || !game) return '—';
@@ -153,14 +157,6 @@
       tab.classList.toggle('is-active', active);
       tab.setAttribute('aria-selected', String(active));
     });
-  }
-
-  function updateSplit() {
-    const vh = window.innerHeight || 800;
-    const minPx = 220;
-    const maxPx = Math.max(minPx, vh * .70);
-    const px = Math.min(maxPx, Math.max(minPx, vh * state.splitRatio));
-    document.documentElement.style.setProperty('--split', `${px}px`);
   }
 
   function parseYouTubeId(input) {
@@ -259,7 +255,9 @@
   });
 
   els.gamePlus.addEventListener('click', () => mutate(() => { currentMode().game += 1; }, 'medium'));
-  els.gameMinus.addEventListener('click', () => mutate(() => { currentMode().game = Math.max(0, currentMode().game - 1); }, 'medium'));
+  els.gameMinus.addEventListener('click', () => mutate(() => {
+    currentMode().game = Math.max(0, currentMode().game - 1);
+  }, 'medium'));
 
   els.counterGrid.addEventListener('click', event => {
     const button = event.target.closest('button[data-key]');
@@ -268,12 +266,17 @@
     if (!COUNTERS.some(c => c.key === key)) return;
     mutate(() => {
       const counters = currentMode().counters;
-      counters[key] = button.dataset.action === 'inc' ? counters[key] + 1 : Math.max(0, counters[key] - 1);
+      counters[key] = button.dataset.action === 'inc'
+        ? counters[key] + 1
+        : Math.max(0, counters[key] - 1);
     });
   });
 
   els.resetMode.addEventListener('click', async () => {
-    const ok = await showConfirm(`MODE ${state.activeMode} をリセット`, '現在のGAME数と5つのカウントを0に戻します。');
+    const ok = await showConfirm(
+      `MODE ${state.activeMode} をリセット`,
+      '現在のGAME数と5つのカウントを0に戻します。'
+    );
     if (!ok) return;
     state.modes[state.activeMode] = defaultsForMode();
     feedback('strong');
@@ -282,7 +285,10 @@
   });
 
   els.clearAll.addEventListener('click', async () => {
-    const ok = await showConfirm('全データを削除', 'A〜Fの記録、補助計算、保存した動画URLをすべて削除します。');
+    const ok = await showConfirm(
+      '全データを削除',
+      'A〜Fの記録、補助計算、保存した動画URLをすべて削除します。'
+    );
     if (!ok) return;
     state = defaults();
     localStorage.removeItem(STORAGE_KEY);
@@ -291,7 +297,6 @@
     loadVideoFromState();
     renderCounters();
     renderTools();
-    updateSplit();
     queueSave();
   });
 
@@ -308,16 +313,20 @@
     queueSave();
     els.videoDialog.close();
   });
+
   els.youtubeUrl.addEventListener('input', () => {
     els.videoError.hidden = true;
     els.youtubeUrl.removeAttribute('aria-invalid');
   });
+
   els.youtubeUrl.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
       event.preventDefault();
       setVideoFromInput();
     }
   });
+
+  els.openTools.addEventListener('click', () => els.toolsDialog.showModal());
 
   ['startGame', 'totalGame', 'trialCount', 'hitCount'].forEach(key => {
     els[key].addEventListener('input', () => {
@@ -327,40 +336,18 @@
     });
   });
 
-  let dragging = false;
-  function applyDrag(clientY) {
-    const vh = window.innerHeight || 800;
-    const min = 220;
-    const max = vh * .70;
-    const y = Math.min(max, Math.max(min, clientY));
-    state.splitRatio = y / vh;
-    updateSplit();
-  }
-  els.splitter.addEventListener('pointerdown', event => {
-    dragging = true;
-    els.splitter.setPointerCapture(event.pointerId);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') queueSave();
   });
-  els.splitter.addEventListener('pointermove', event => { if (dragging) applyDrag(event.clientY); });
-  els.splitter.addEventListener('pointerup', () => { if (dragging) { dragging = false; feedback('light'); queueSave(); } });
-  els.splitter.addEventListener('pointercancel', () => { dragging = false; });
-  els.splitter.addEventListener('keydown', event => {
-    if (!['ArrowUp', 'ArrowDown'].includes(event.key)) return;
-    event.preventDefault();
-    state.splitRatio = Math.min(.70, Math.max(.24, state.splitRatio + (event.key === 'ArrowDown' ? .03 : -.03)));
-    updateSplit();
-    queueSave();
-  });
-
-  window.addEventListener('resize', updateSplit, { passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') queueSave(); });
 
   renderCounters();
   renderTools();
-  updateSplit();
   loadVideoFromState();
   queueSave();
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(console.warn);
+    });
   }
 })();
