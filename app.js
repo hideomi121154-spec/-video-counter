@@ -33,6 +33,10 @@
     counterGrid: $('counterGrid'),
     youtubeUrl: $('youtubeUrl'),
     loadVideo: $('loadVideo'),
+    clearVideo: $('clearVideo'),
+    openVideoSettings: $('openVideoSettings'),
+    videoDialog: $('videoDialog'),
+    videoError: $('videoError'),
     youtubePlayer: $('youtubePlayer'),
     playerPlaceholder: $('playerPlaceholder'),
     gameCount: $('gameCount'),
@@ -178,6 +182,7 @@
 
   function loadVideoFromState() {
     if (!state.videoId) {
+      els.youtubePlayer.src = '';
       els.youtubePlayer.hidden = true;
       els.playerPlaceholder.hidden = false;
       return;
@@ -185,6 +190,30 @@
     els.youtubePlayer.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(state.videoId)}?playsinline=1&rel=0`;
     els.youtubePlayer.hidden = false;
     els.playerPlaceholder.hidden = true;
+  }
+
+  function openVideoDialog() {
+    els.youtubeUrl.value = state.videoUrl;
+    els.videoError.hidden = true;
+    els.videoDialog.showModal();
+    setTimeout(() => els.youtubeUrl.focus(), 0);
+  }
+
+  function setVideoFromInput() {
+    const id = parseYouTubeId(els.youtubeUrl.value);
+    if (!id) {
+      els.videoError.hidden = false;
+      els.youtubeUrl.setAttribute('aria-invalid', 'true');
+      return;
+    }
+    els.videoError.hidden = true;
+    els.youtubeUrl.removeAttribute('aria-invalid');
+    state.videoId = id;
+    state.videoUrl = els.youtubeUrl.value.trim();
+    feedback('medium');
+    loadVideoFromState();
+    queueSave();
+    els.videoDialog.close();
   }
 
   function showConfirm(title, message) {
@@ -259,7 +288,6 @@
     localStorage.removeItem(STORAGE_KEY);
     feedback('strong');
     els.youtubeUrl.value = '';
-    els.youtubePlayer.src = '';
     loadVideoFromState();
     renderCounters();
     renderTools();
@@ -267,24 +295,28 @@
     queueSave();
   });
 
-  els.loadVideo.addEventListener('click', () => {
-    const id = parseYouTubeId(els.youtubeUrl.value);
-    if (!id) {
-      els.youtubeUrl.setCustomValidity('有効なYouTube URLまたは動画IDを入力してください。');
-      els.youtubeUrl.reportValidity();
-      return;
-    }
-    els.youtubeUrl.setCustomValidity('');
-    state.videoId = id;
-    state.videoUrl = els.youtubeUrl.value.trim();
-    feedback('medium');
+  els.openVideoSettings.addEventListener('click', openVideoDialog);
+  els.playerPlaceholder.addEventListener('click', openVideoDialog);
+  els.loadVideo.addEventListener('click', setVideoFromInput);
+  els.clearVideo.addEventListener('click', () => {
+    state.videoId = '';
+    state.videoUrl = '';
+    els.youtubeUrl.value = '';
+    els.videoError.hidden = true;
     loadVideoFromState();
+    feedback('medium');
     queueSave();
+    els.videoDialog.close();
   });
-
-  els.youtubeUrl.addEventListener('input', () => els.youtubeUrl.setCustomValidity(''));
+  els.youtubeUrl.addEventListener('input', () => {
+    els.videoError.hidden = true;
+    els.youtubeUrl.removeAttribute('aria-invalid');
+  });
   els.youtubeUrl.addEventListener('keydown', event => {
-    if (event.key === 'Enter') { event.preventDefault(); els.loadVideo.click(); }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      setVideoFromInput();
+    }
   });
 
   ['startGame', 'totalGame', 'trialCount', 'hitCount'].forEach(key => {
@@ -322,7 +354,6 @@
   window.addEventListener('resize', updateSplit, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') queueSave(); });
 
-  els.youtubeUrl.value = state.videoUrl;
   renderCounters();
   renderTools();
   updateSplit();
