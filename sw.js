@@ -1,5 +1,12 @@
-const CACHE_NAME = 'video-counter-v0.1.0';
-const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'video-counter-v0.1.1';
+const APP_SHELL = [
+  './',
+  './index.html',
+  './styles.css?v=0.1.1',
+  './app.js?v=0.1.1',
+  './manifest.webmanifest?v=0.1.1',
+  './icon.svg'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -16,18 +23,33 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
 
-  // Never cache YouTube/embed traffic. The app shell remains available offline,
-  // but video playback correctly depends on the network and YouTube availability.
   if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be') || url.hostname.includes('googlevideo.com')) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(() => caches.match('./index.html')));
+    event.respondWith(
+      fetch(new Request(request, { cache: 'no-store' }))
+        .then(response => {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy)));
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
     return;
   }
 
   if (url.origin === self.location.origin) {
-    event.respondWith(caches.match(request).then(cached => cached || fetch(request)));
+    event.respondWith(
+      fetch(new Request(request, { cache: 'no-store' }))
+        .then(response => {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, copy)));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
   }
 });
