@@ -1,10 +1,10 @@
-const CACHE_NAME = 'video-counter-v0.1.1';
+const CACHE_NAME = 'video-counter-v0.1.2';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=0.1.1',
-  './app.js?v=0.1.1',
-  './manifest.webmanifest?v=0.1.1',
+  './styles.css?v=0.1.2',
+  './app.js?v=0.1.2',
+  './manifest.webmanifest?v=0.1.2',
   './icon.svg'
 ];
 
